@@ -1,12 +1,10 @@
 package bucketHash;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import tree.Tree;
 
 public class BucketHash<K, V> implements Map<K, V> {
 	private int numBuckets = 101;
@@ -14,7 +12,9 @@ public class BucketHash<K, V> implements Map<K, V> {
 	
 	//CONSTRUCTORS
 	public BucketHash() {
-		//TODO
+		for (int i = 0; i < numBuckets; i++) {
+			buckets[i] = new Bucket();
+		}
 	}
 	
 	public BucketHash(Map<K, V> map) {
@@ -94,7 +94,7 @@ public class BucketHash<K, V> implements Map<K, V> {
 	}
 	
 	Bucket getBucket(K key) {
-		// TODO
+		return (Bucket)buckets[key.hashCode() % numBuckets];
 	}
 	
 	private int getIndex(Object o) {
@@ -102,46 +102,138 @@ public class BucketHash<K, V> implements Map<K, V> {
 	}
 	
 	class Bucket {
-		ListNode header = null;
+		ListNode header;
+		int size = 0;
 		
-		private class ListNode {
-			ListNode(K key, V vaue, ListNode next) {
-				// TODO
+		class ListNode {
+			K key;
+			V value;
+			ListNode next;
+			
+			ListNode(K key, V value, ListNode next) {
+				this.key = key;
+				this.value = value;
+				this.next = next;
 			}
+			
 		}
 		
 		public Bucket() {
-			// TODO
+			header = null;
 		}
 		
 		public V get(K key) {
-			//TODO
+			ListNode node = find(key);
+			if (node == null) {
+				return null;
+			}
+			else {
+				return node.value;
+			}
+		}
+		
+		public int size() {
+			return size;
 		}
 		
 		private ListNode find(K key) {
-			// TODO - OPTIONAL
+			ListNode current = header;
+			
+			while (current != null) {
+				if (key.equals(current.key)) {
+					return current;
+				}
+				current = current.next;
+			}
+			
+			return null;
 		}
 		
 		public V put(K key, V value) {
-			//TODO
+
+			if (key == null || value == null)
+				throw new IllegalArgumentException("neither key nor value can be null");
+
+
+			ListNode node = find(key);
+			
+			if (node == null) {
+				size++;
+				ListNode temp = header;
+				header = new ListNode(key, value, temp);
+				return null;
+			}
+			else {
+				V oldValue = node.value;
+				node.value = value;
+				return oldValue;
+			}
 		}
 		
 		public V remove(K key) {
-			//TODO
+			
+			//check if it is first element in list
+			if (header.key.equals(key)) {
+				size--;
+				V value = header.value;
+				header = header.next;
+				return value;
+			}
+			
+			ListNode previous = null;
+			ListNode current = header;
+			
+			//check remaining elements
+			while (current != null) {
+				if (current.key.equals(key)) {
+					size--;
+					V value = current.value;
+					previous.next = current.next;
+					return value;
+				}
+				previous = current;
+				current = current.next;
+			}
+			
+			return null;
 		}
 		
-		public Set<K> keyset() {
-			//TODO
+		public Set<K> keySet() {
+			Set<K> keySet = new HashSet<K>();
+			ListNode current = header;
+			
+			while (current != null) {
+				keySet.add(current.key);
+				current = current.next;
+			}
+			
+			return keySet;
+			
 		}
 		
 		public Collection<V> values() {
-			//TODO
+			Collection<V> values = new ArrayList<V>();
+			
+			ListNode current = header;
+			while (current != null) {
+				values.add(current.value);
+				current = current.next;
+			}
+			
+			return values;
 		}
 		
 		public String toString() {
-			//TODO - OPTIONAL
+			StringBuffer s = new StringBuffer();
+			
+			ListNode current = header;
+			while (current != null) {
+				String t = "(" + current.key + " " + current.value + ")" + "-->";
+				s.append(t);
+				current = current.next;
+			}
+			return s.append("END\n").toString();
 		}
 	}
 	
-
 }
