@@ -3,6 +3,7 @@ package bucketHash;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,7 +19,12 @@ public class BucketHash<K, V> implements Map<K, V> {
 	}
 	
 	public BucketHash(Map<K, V> map) {
-		//TODO
+		for (int i = 0; i < numBuckets; i++) {
+			buckets[i] = new Bucket();
+		}
+		
+		putAll(map);
+		
 	}
 	
 
@@ -26,86 +32,148 @@ public class BucketHash<K, V> implements Map<K, V> {
 	
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		int size = 0;
+		for (Object x : buckets) 
+			size += ((Bucket)x).size();
+	
+		return size;
 	}
 	@Override
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
+		for (Object x : buckets) {
+			if(((Bucket)x).size() != 0)
+				return false;
+		}
+		
+		return true;
 	}
 	@Override
 	public boolean containsKey(Object key) {
-		// TODO Auto-generated method stub
-		return false;
+		//TODO - casting key to K
+	
+		if (((Bucket)buckets[getIndex(key)]).get((K)key) == null)
+			return false;
+		else
+			return true;
 	}
 	@Override
 	public boolean containsValue(Object value) {
-		// TODO Auto-generated method stub
+		for(int i = 0; i < numBuckets; i++) {
+			if (((Bucket)buckets[i]).containsValue((V)value))
+				return true;
+		}
+		
 		return false;
 	}
+	
 	@Override
-	public V get(Object key) {
-		// TODO Auto-generated method stub
-		return null;
+	public V get(Object key) throws NullPointerException {
+		if (key == null)
+			throw new NullPointerException();
+		
+		return ((Bucket)buckets[getIndex(key)]).get((K)key);
 	}
+	
 	@Override
-	public V put(K key, V value) {
-		// TODO Auto-generated method stub
-		return null;
+	public V put(K key, V value) throws NullPointerException {
+		return ((Bucket)buckets[getIndex(key)]).put(key, value);
+
 	}
+	
 	@Override
 	public V remove(Object key) {
-		// TODO Auto-generated method stub
-		return null;
+		return ((Bucket)buckets[getIndex(key)]).remove((K)key);
 	}
+	
 	@Override
 	public void putAll(Map<? extends K, ? extends V> m) {
-		// TODO Auto-generated method stub
+		if (m == null)
+			throw new NullPointerException();
+		
+		for (Map.Entry<? extends K, ? extends V> x : m.entrySet()) {
+			K key = x.getKey();
+			V value = x.getValue();
+			
+			((Bucket)buckets[getIndex(key)]).put(key, value);
+		}
 		
 	}
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
+		for(int i = 0; i < numBuckets; i++) {
+			buckets[i] = new Bucket();
+		}
 		
 	}
 	@Override
 	public Set<K> keySet() {
-		// TODO Auto-generated method stub
-		return null;
+		Set<K> keySet = new HashSet();
+		for(int i = 0; i < numBuckets; i++) {
+			keySet.addAll(((Bucket)buckets[i]).keySet());
+		}
+		
+		return keySet;
 	}
 	@Override
 	public Collection<V> values() {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<V> values = new ArrayList();
+		for(int i = 0; i < numBuckets; i++) {
+			values.addAll(((Bucket)buckets[i]).values());
+		}
+		
+		return values;
 	}
 	@Override
 	public Set<java.util.Map.Entry<K, V>> entrySet() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 	
+	@Override
 	public boolean equals(Object object) {
-		// TODO
+		if (object == this)
+			return true;
+		
+		if (!(object instanceof Map)) 
+			return false;
+		
+		Map<K, V> that = (Map<K, V>) object;
+		if (this.size() != that.size())
+			return false;
+		
+		for (Map.Entry<K, V> x : that.entrySet()) {
+			K key = x.getKey();
+			V value = x.getValue();
+			if (!((Bucket)buckets[getIndex(x.getKey())]).containsMap(key, value))
+				return false;
+		}
+		
+		return true;
 	}
 	
+	@Override
 	public int hashCode() {
-		// TODO
+		int hashCode = 0;
+		
+		for(int i = 0; i < numBuckets; i++) {
+			hashCode += ((Bucket)buckets[i]).hashCode();
+		}
+		
+		return hashCode;
 	}
 	
 	Bucket getBucket(K key) {
-		return (Bucket)buckets[key.hashCode() % numBuckets];
+		return (Bucket)buckets[getIndex(key)];
 	}
 	
 	private int getIndex(Object o) {
-		// TODO - optional
+		return o.hashCode() % numBuckets;
 	}
 	
 	class Bucket {
 		ListNode header;
 		int size = 0;
 		
-		class ListNode {
+		private class ListNode {
 			K key;
 			V value;
 			ListNode next;
@@ -123,6 +191,9 @@ public class BucketHash<K, V> implements Map<K, V> {
 		}
 		
 		public V get(K key) {
+			if (key == null) 
+				throw new NullPointerException();
+			
 			ListNode node = find(key);
 			if (node == null) {
 				return null;
@@ -130,6 +201,42 @@ public class BucketHash<K, V> implements Map<K, V> {
 			else {
 				return node.value;
 			}
+		}
+		
+		public int hashCode() {
+			ListNode current = header;
+			
+			int hashCode = 0;
+			while (current != null) {
+				hashCode += (current.key == null ? 0 : current.key.hashCode()) ^
+			     (current.value == null ? 0 : current.value.hashCode());
+				current = current.next;
+			}
+			
+			return hashCode;
+		}
+		
+		public boolean containsMap(K key, V value) {
+			ListNode result = find(key);
+			if (result == null) 
+				return false;
+			else 
+				return value.equals(result.value);
+			
+		}
+		public boolean containsValue(V value) {
+			if (value == null) 
+				throw new NullPointerException();
+			
+			ListNode current = header;
+			
+			while (current != null) {
+				if (current.value.equals(value))
+					return true;
+				current = current.next;
+			}
+			
+			return false;
 		}
 		
 		public int size() {
@@ -152,7 +259,7 @@ public class BucketHash<K, V> implements Map<K, V> {
 		public V put(K key, V value) {
 
 			if (key == null || value == null)
-				throw new IllegalArgumentException("neither key nor value can be null");
+				throw new NullPointerException("neither key nor value can be null");
 
 
 			ListNode node = find(key);
