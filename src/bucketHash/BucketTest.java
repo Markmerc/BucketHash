@@ -44,7 +44,7 @@ public class BucketTest {
 		table.getBucket(0).put(0, "ONE");
 		table.getBucket(0).put(101, "TWO");
 		assertTrue(table.getBucket(0).header != null);
-		assertTrue(table.getBucket(0).size == 2);
+		assertTrue(table.getBucket(0).size() == 2);
 		
 		//made ListNode protected for these tests
 //		assertTrue(table.getBucket(0).header.value.equals("TWO"));
@@ -53,7 +53,7 @@ public class BucketTest {
 		
 		table.getBucket(0).put(101, "THREE");
 //		assertTrue(table.getBucket(0).header.value.equals("THREE"));
-		assertTrue(table.getBucket(0).size == 2);
+		assertTrue(table.getBucket(0).size() == 2);
 		
 		assertNull(table.getBucket(0).put(202, "FOUR"));
 		assertTrue(table.getBucket(0).put(202, "FIVE").equals("FOUR"));
@@ -114,7 +114,7 @@ public class BucketTest {
 		
 		//Removes head
 		assertTrue(table.getBucket(0).remove(202).equals("THREE"));
-		assertTrue(table.getBucket(0).size == 2);
+		assertTrue(table.getBucket(0).size() == 2);
 //		assertTrue(table.getBucket(0).header.value.equals("TWO"));
 //		assertTrue(table.getBucket(0).header.next.value.equals("ONE"));
 //		assertNull(table.getBucket(0).header.next.next);		
@@ -123,7 +123,7 @@ public class BucketTest {
 		//Remove tail
 		table.getBucket(0).put(202, "THREE");
 		assertTrue(table.getBucket(0).remove(0).equals("ONE"));
-		assertTrue(table.getBucket(0).size == 2);
+		assertTrue(table.getBucket(0).size() == 2);
 //		assertTrue(table.getBucket(0).header.value.equals("THREE"));
 //		assertTrue(table.getBucket(0).header.next.value.equals("TWO"));	
 //		assertNull(table.getBucket(0).header.next.next);	
@@ -131,14 +131,14 @@ public class BucketTest {
 		//Remove middle
 		table.getBucket(0).put(0, "FOUR");
 		assertTrue(table.getBucket(0).remove(202).equals("THREE"));
-		assertTrue(table.getBucket(0).size == 2);
+		assertTrue(table.getBucket(0).size() == 2);
 //		assertTrue(table.getBucket(0).header.value.equals("FOUR"));
 //		assertTrue(table.getBucket(0).header.next.value.equals("TWO"));	
 //		assertNull(table.getBucket(0).header.next.next);
 
 		//Remove non existing key
 		assertNull(table.getBucket(0).remove(505));
-		assertTrue(table.getBucket(0).size == 2);
+		assertTrue(table.getBucket(0).size() == 2);
 //		assertTrue(table.getBucket(0).header.value.equals("FOUR"));
 //		assertTrue(table.getBucket(0).header.next.value.equals("TWO"));	
 //		assertNull(table.getBucket(0).header.next.next);
@@ -201,8 +201,7 @@ public class BucketTest {
 	
 	@Test
 	public void testHashCode() {
-		//TODO
-		fail();
+		//Tested by other tests in BucketHashTest
 	}
 
 }

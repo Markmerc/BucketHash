@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.util.*;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class BucketHashTest {
@@ -23,6 +22,17 @@ public class BucketHashTest {
 
 	}
 
+	@Test
+	public void constructors() {
+		table.put(0, "dog");
+		table.put(1, "cat");
+		table.put(2, "tree");
+		
+		BucketHash<Integer, String> copy = new BucketHash<Integer, String>(table);
+		assertTrue(copy.equals(table));
+		
+		assertTrue(new BucketHash<String, String>().isEmpty());
+	}
 	
 	
 	@Test
@@ -64,14 +74,21 @@ public class BucketHashTest {
     
 	@Test
 	public void testHashCode() {
-		//TODO
-		fail();
+		table.put(100, "foo");
+		table.put(200, "bar");
+		table.put(300, "baz");
+		
+		HashMap<Integer, String> test = new HashMap<Integer, String>();
+		test.put(100, "foo");
+		test.put(200, "bar");
+		test.put(300, "baz");
+		
+		assertEquals(table.hashCode(), test.hashCode());
+		
+		test.put(400, "coo");
+		assertFalse(table.hashCode() == test.hashCode());
 	}
 
-	@Test
-	public void testBucketHash() {
-		fail("Not yet implemented");
-	}
 
 	@Test
 	public void testBucketHashMapOfKV() {
@@ -201,6 +218,9 @@ public class BucketHashTest {
 		keySet.add(70);
 		
 		assertTrue(keySet.equals(table.keySet()));
+		
+		table.put(90, "DOG");
+		assertFalse(keySet.contains("DOG"));
 
 	}
 
@@ -216,6 +236,9 @@ public class BucketHashTest {
 		values.add("BAZ");
 		
 		assertTrue(values.equals(table.values()));
+		
+		table.put(80, "DOG");
+		assertFalse(values.contains("DOG"));
 	}
 
 	@Test(expected=UnsupportedOperationException.class)
@@ -237,19 +260,51 @@ public class BucketHashTest {
 		table2.put(3, "FOO");
 		table2.put(4, "FOO");
 
+		//Two tables with same key, values
 		assertTrue(table.equals(table2));
-		
+		assertTrue(table2.equals(table));
+
+		//Two tables different sizes
 		table2.put(5, "FOO");
 		assertFalse(table.equals(table2));
+		assertFalse(table2.equals(table));
+
+		
 		table.put(5, "FOO");
 		table.put(6, "FOO");
 		assertFalse(table.equals(table2));
+		assertFalse(table2.equals(table));
+
+		
+		//Two tables, same size, same keys, different values
+		table2.put(6, "DOG");
+		assertTrue(table.size() == table2.size());
+		assertFalse(table.equals(table2));
+		assertFalse(table2.equals(table));
+
+		
+		//Two tables, same size, null key
+		table2.remove(6);
+		table2.put(null, "DOG");
+		assertTrue(table.size() == table2.size());
+		assertFalse(table.equals(table2));
+		assertFalse(table2.equals(table));
+
+		//Two tables, same size, same keys, null value
+		table2.remove(null);
+		table2.put(5, null);
+		table.remove(6);
+		assertTrue(table.size() == table2.size());
+		assertFalse(table.equals(table2));
+		assertFalse(table2.equals(table));
+
+		
 
 	}
 
-	@Test
-	public void testGetBucket() {
-		fail("Not yet implemented");
-	}
+//	@Test
+//	public void testGetBucket() {
+//		fail("Not yet implemented");
+//	}
 
 }
